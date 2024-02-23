@@ -1,0 +1,112 @@
+---
+title: "Untitled"
+output: 
+  flexdashboard::flex_dashboard:
+    orientation: columns
+    vertical_layout: fill
+    storyboard: true
+---
+
+```{r setup, include=FALSE}
+library(flexdashboard)
+library(spotifyr)
+library(ggplot2)
+library(gapminder)
+library(spotifyr)
+library(tidyverse)
+library(usethis)
+library(plotly)
+library(remotes)
+library(compmus)
+```
+
+Column {data-width=650}
+-----------------------------------------------------------------------
+
+### Chart A
+
+```{r}
+wood <-
+  get_tidy_audio_analysis("6IQILcYkN2S2eSu5IHoPEH") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+
+wood |>
+  mutate(pitches = map(pitches, compmus_normalise, "euclidean")) |>
+  compmus_gather_chroma() |> 
+  ggplot(
+    aes(
+      x = start + duration / 2,
+      width = duration,
+      y = pitch_class,
+      fill = value
+    )
+  ) +
+  geom_tile() +
+  labs(x = "Time (s)", y = NULL, fill = "Magnitude") +
+  theme_minimal() +
+  scale_fill_viridis_c()
+```
+
+Column {data-width=350}
+-----------------------------------------------------------------------
+
+### Chart B
+
+```{r}
+## The Tallis Scholars
+tallis <-
+  get_tidy_audio_analysis("2J3Mmybwue0jyQ0UVMYurH") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+## La Chapelle Royale
+chapelle <-
+  get_tidy_audio_analysis("4ccw2IcnFt1Jv9LqQCOYDi") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+## The Cambridge Singers
+cambridge <-
+  get_tidy_audio_analysis("54cAT1TCFaZbLOB2i1y61h") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+
+## Oxford Camerata
+oxford <-
+  get_tidy_audio_analysis("5QyUsMY40MQ1VebZXSaonU") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+## Chanticleer
+chanticleer <-
+  get_tidy_audio_analysis("1bocG1N8LM7MSgj9T1n3XH") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+
+
+## The Hilliard Ensemble
+hilliard <-
+  get_tidy_audio_analysis("2rXEyq50luqaFNC9DkcU6k") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+## The Gabrieli Consort
+gabrieli <-
+  get_tidy_audio_analysis("4NnJ4Jes8a8mQUfXhwuITx") |>
+  select(segments) |>
+  unnest(segments) |>
+  select(start, duration, pitches)
+```
+
+### Chart C
+
+```{r}
+
+```
+
