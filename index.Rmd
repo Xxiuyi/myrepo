@@ -1,5 +1,6 @@
 ---
-title: "Untitled"
+title: "Portfolio for Computational Musicology"
+author: "Nora Saleh"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
@@ -23,7 +24,7 @@ library(compmus)
 Column {data-width=650}
 -----------------------------------------------------------------------
 
-### Chart A
+<!-- ### Chart A -->
 
 ```{r}
 wood <-
