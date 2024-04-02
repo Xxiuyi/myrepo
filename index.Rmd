@@ -4,27 +4,22 @@ author: "Nora Saleh"
 output: 
   flexdashboard::flex_dashboard:
     orientation: columns
-    vertical_layout: fill
-    storyboard: true
-    self_contained: false
+    vertical_layout: scroll
     theme:
-      heading_font:
-        google: 
-          family: Rajdhani
-          wght: 700
-      base_font:
-        google: Fira Sans
-      code_font:
-        google: Fira Mono
-      bg: "#FFFFFF"
-      fg: "#212529" 
-      primary: "#2b2bee"
-      secondary: "#39d7b8"
-      success: "#39d7b8"
-      danger: "#fa5577"
-      warning: "#ffb14c"
-      info: "#0cc7f1"
+      version: 4
+      bootswatch: minty
 ---
+
+```{=html}
+<style>
+.dataTables_scrollBody {
+    height:540px !important;
+}
+.chart-stage-flex {
+    overflow:auto !important;
+}
+</style>
+```
 
 ```{r setup, include=FALSE}
 library(flexdashboard)
@@ -42,9 +37,21 @@ library(tidymodels)
 library(heatmaply)
 library(protoclust)
 ```
-
-Column {data-width=650}
 -----------------------------------------------------------------------
+# Introduction
+
+## Column
+
+### Corpus Description {style="min-height:400px"}
+The corpus will consist of K-pop songs spanning two distinct eras in the genre's evolution: the 2nd generation (2005-2011) and the 4th generation (2018-2022).  K-pop is getting increasingly more popular outside South-Korea, captivating audiences with its infectious melodies. Through this corpus, I aim to explore the diverse sounds, themes, and trends within the genre, shedding light on its evolution. The 2nd generation witnessed the rise of iconic groups like Girls' Generation and Big Bang. In contrast, the 4th generation marked a new era of global influence, with groups such as BTS and BLACKPINK reaching unprecedented levels of success. I expect significant differences between the 2nd and 4th generation tracks in terms of sound, production techniques. The 4th generation is likely to showcase a broader range of genres, experimental production styles.
+
+# Key and Chord Estimation {data-navmenu="Analysis" data-orientation=rows}
+
+## Row {style="min-height:600px"}
+
+### Description
+
+What we see:
 
 ### Key and Chord Estimation
 ```{r}
@@ -163,7 +170,7 @@ twenty_five |>
 
 ```
 
-### Track-Level Summaries
+# Track-Level Summaries {data-navmenu="Analysis" data-orientation=rows}
 ```{r}
 bebop <-
   get_playlist_audio_features(
@@ -217,12 +224,9 @@ jazz |>
 
 ```
 
-### Introduction
-The corpus will consist of K-pop songs spanning two distinct eras in the genre's evolution: the 2nd generation (2005-2011) and the 4th generation (2018-2022).  K-pop is getting increasingly more popular outside South-Korea, captivating audiences with its infectious melodies. Through this corpus, I aim to explore the diverse sounds, themes, and trends within the genre, shedding light on its evolution. The 2nd generation witnessed the rise of iconic groups like Girls' Generation and Big Bang. In contrast, the 4th generation marked a new era of global influence, with groups such as BTS and BLACKPINK reaching unprecedented levels of success. I expect significant differences between the 2nd and 4th generation tracks in terms of sound, production techniques. The 4th generation is likely to showcase a broader range of genres, experimental production styles.
-
 ### Chart A
 
-### Data Collection and Preprocessing
+# Data Collection and Preprocessing {data-navmenu="Analysis" data-orientation=rows}
 ```{r}
 secondgg <- get_playlist_audio_features("", "53gZC84IKZk5QoOqSwgUg9")
 fourthgg <- get_playlist_audio_features("", "0XlcubxUyMwSOP3GOgzbQR")
@@ -331,6 +335,6 @@ awards |>                    # Start with awards.
   )
 ```
 
-### Conclusion
+# Conclusion
 
 
