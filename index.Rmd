@@ -1,8 +1,9 @@
 ---
 title: "Portfolio for Computational Musicology"
 author: "Nora Saleh"
-output: 
+output:
   flexdashboard::flex_dashboard:
+    self_contained: false
     orientation: columns
     vertical_layout: scroll
     theme:
@@ -26,7 +27,6 @@ library(flexdashboard)
 library(spotifyr)
 library(ggplot2)
 library(gapminder)
-library(spotifyr)
 library(tidyverse)
 library(usethis)
 library(plotly)
@@ -42,13 +42,7 @@ fourthgg <- readRDS(file = "data/fourthgg-data.RDS")
 secondbg <- readRDS(file = "data/secondbg-data.RDS")
 fourthbg <- readRDS(file = "data/fourthbg-data.RDS")
 
-corpus <- secondgg |>
-  mutate(playlist = "Second gen girlgroup") |>
-  bind_rows(fourthgg |> mutate(playlist = "Fourth gen girlgroup")) |>
-  bind_rows(secondbg |> mutate(playlist = "Second gen boygroup"))
-  bind_rows(fourthbg |> mutate(playlist = "Fourth gen boygroup"))
-
-corpus_all <- rbind(secondgg, secondbg, fourthgg, fourthbg)
+corpus <- readRDS(file = "data/corpus-data.RDS")
 ```
 -----------------------------------------------------------------------
 # Introduction
@@ -56,7 +50,7 @@ corpus_all <- rbind(secondgg, secondbg, fourthgg, fourthbg)
 ## Column
 
 ### Corpus Description {style="min-height:400px"}
-The corpus will consist of K-pop songs spanning two distinct eras in the genre's evolution: the 2nd generation (2005-2011) and the 4th generation (2018-2022).  K-pop is getting increasingly more popular outside South-Korea, captivating audiences with its infectious melodies. Through this corpus, I aim to explore the diverse sounds, themes, and trends within the genre, shedding light on its evolution. The 2nd generation witnessed the rise of iconic groups like Girls' Generation and Big Bang. In contrast, the 4th generation marked a new era of global influence, with groups such as BTS and BLACKPINK reaching unprecedented levels of success. I expect significant differences between the 2nd and 4th generation tracks in terms of sound, production techniques. The 4th generation is likely to showcase a broader range of genres, experimental production styles. I chose the corpus based on how many Spotify streams the songs have. In Spotifyś K-pop genre are more than 500 
+The corpus will consist of K-pop songs spanning two distinct eras in the genre's evolution: the 2nd generation (2005-2011) and the 4th generation (2018-2022). K-pop is getting increasingly more popular outside South-Korea, captivating audiences with its infectious melodies. Through this corpus, I aim to explore the diverse sounds, themes, and trends within the genre, shedding light on its evolution. The 2nd generation witnessed the rise of iconic groups like Girls' Generation and Big Bang. In contrast, the 4th generation marked a new era of global influence, with groups such as BTS and BLACKPINK reaching unprecedented levels of success. I expect significant differences between the 2nd and 4th generation tracks in terms of sound, production techniques. The 4th generation is likely to showcase a broader range of genres, experimental production styles. I chose the corpus based on how many Spotify streams the songs have. In Spotifyś K-pop genre are more than 500 
 
 
 ***
@@ -68,6 +62,87 @@ The corpus will consist of K-pop songs spanning two distinct eras in the genre's
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/0UqgifAkmHt86pzVTfBcmS?utm_source=generator&theme=0" width="60%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
 
 <iframe style="border-radius:12px" src="https://open.spotify.com/embed/playlist/53gZC84IKZk5QoOqSwgUg9?utm_source=generator" width="60%" height="352" frameBorder="0" allowfullscreen="" allow="autoplay; clipboard-write; encrypted-media; fullscreen; picture-in-picture"></iframe>
+
+
+# Global Analysis {data-navmenu="Analysis" data-orientation=rows}
+
+## Row {style="min-height:600px"}
+
+### Description {data-width="350"}
+
+#### Analysis over the entire range of songs
+
+The multivariate analysis plot shows a comparison of the liveness, acousticness and the speechness of each individual song in the corpus. There appears to be very a large bunch of songs with low acousticness and liveness. The speechness on the other hand seems all over the place, likely due to the vast differences in songs
+
+
+### Multivariate Analysis {data-width="650"}
+
+```{r, echo=FALSE}
+corpus_with_title <-
+  corpus %>%
+  mutate(title = paste(track.album.name, " - ", track.name))
+
+
+multi_plot_1 <- ggplot(corpus_with_title, aes(x = liveness, y = acousticness, color = speechiness, size = speechiness, label = title)) +
+  geom_jitter(alpha = 0.7, width = 0.1) +
+  theme_classic() +
+  scale_color_viridis_c() +
+  guides(size = "none") +
+  labs(title = "Comparison of Liveness, Acousticness and Speechness",
+       subtitle = "The plot consists of the liveness, acousticness and speechness of all individual songs"
+  ) +
+  theme(
+    legend.position = "Bottom"
+  )
+
+ggplotly(multi_plot_1, tooltip = c("x", "y", "label", "size"))
+```
+
+## Row {style="min-height:580px"}
+
+### Key's and Tempo's
+
+We see in the two right plots a distribution of the key mode and tempo over all songs. The tempo distribution shows that the songs in the corpus is highly densed between 97 and 135 BPM with a big peak at around 130 BPM and a smaller peak at around 113 BPM. The mean tempo of the corpus is 123 BPM which seems to be a little higher than most pop songs. According to the key mode plot, B minor is the most common with 15 occurrences in the corpus followed closely by F# minor with 14 occurrences. What is interesting, is that all keys that Spotify assigns are represented at least once.
+
+### Density Distribution of the Tempo
+
+```{r, echo=FALSE}
+
+keysPlot <- ggplot(corpus, aes(key_mode)) +
+  stat_count(fill = "brown3", color="brown", alpha=.9, width=0.5, position = "dodge") +
+  labs(x = "Key",
+       y = "Frequency") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10))
+
+mean_tempo <- mean(corpus$tempo)
+
+tempoPlot <- corpus %>% filter(tempo > 0) %>% ggplot(aes(tempo)) +
+  geom_histogram(aes(y=..density..), bins=30, fill="aquamarine3", color="aquamarine4") +
+  geom_density() +
+  labs(x = "Tempo in BPM",
+       y = "Density") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1, size = 10)) +
+  geom_vline(xintercept = mean_tempo, color = "brown1", linetype = 2) +
+  annotate(
+    "text",
+    x = mean_tempo + 6, y = 0.017,
+    label = "Mean\nTempo",
+    vjust = 1, size = 3, color = "grey40"
+  )
+
+ggplotly(tempoPlot)
+
+```
+
+### Frequency of Different Key's
+
+```{r, echo=FALSE}
+ggplotly(keysPlot)
+
+```
+
 
 # Key and Chord Estimation {data-navmenu="Analysis" data-orientation=rows}
 
@@ -253,107 +328,6 @@ jazz |>
 # Data Collection and Preprocessing {data-navmenu="Analysis" data-orientation=rows}
 ```{r}
 
-secondgg |>
-  summarise(
-    mean_speechiness = mean(speechiness),
-    mean_acousticness = mean(acousticness),
-    mean_liveness = mean(liveness),
-    sd_speechiness = sd(speechiness),
-    sd_acousticness = sd(acousticness),
-    sd_liveness = sd(liveness),
-    median_speechiness = median(speechiness),
-    median_acousticness = median(acousticness),
-    median_liveness = median(liveness),
-    mad_speechiness = mad(speechiness),
-    mad_acousticness = mad(acousticness),
-    mad_liveness = mad(liveness)
-  )
-
-awards <-
-  bind_rows(
-    secondgg |> mutate(category = "Second Generation"),
-    fourthgg |> mutate(category = "Fourth Generation")
-  )
-
-secondgg |> ggplot(aes(x = energy)) + geom_histogram(binwidth = 0.1)
-
-awards |>
-  ggplot(aes(x = energy)) +
-  geom_histogram(binwidth = 0.1) +
-  facet_wrap(~category)
-
-awards |>
-  ggplot(aes(x = category, y = energy)) +
-  geom_boxplot()
-
-awards |>
-  ggplot(aes(x = category, y = energy)) +
-  geom_violin()
-
-secondgg |> ggplot(aes(x = valence, y = energy)) + geom_point() + geom_smooth()
-```
-
-### Chart B
-
-```{r}
-awards |>                    # Start with awards.
-  mutate(
-    mode = ifelse(mode == 0, "Minor", "Major")
-  ) |>
-  ggplot(                     # Set up the plot.
-    aes(
-      x = valence,
-      y = energy,
-      size = loudness,
-      colour = mode
-    )
-  ) +
-  geom_point() +              # Scatter plot.
-  geom_rug(linewidth = 0.1) + # Add 'fringes' to show data distribution.
-  geom_text(                  # Add text labels from above.
-    aes(
-      x = valence,
-      y = energy,
-      label = label
-    ),
-    data = 
-      tibble(
-        label = c(""),
-        category = c("Fourth", "Second"),
-        valence = c(0.104, 0.0339),
-        energy = c(0.992, 0.00166)
-      ),
-    colour = "black",         # Override colour (not mode here).
-    size = 3,                 # Override size (not loudness here).
-    hjust = "left",           # Align left side of label with the point.
-    vjust = "center",         # Align vertical center of label with the point.
-    nudge_x = 0.02            # Nudge the label slightly right.
-  ) +
-  facet_wrap(~ category) +    # Separate charts per playlist.
-  scale_x_continuous(         # Fine-tune the x axis.
-    limits = c(0, 1),
-    breaks = c(0, 0.50, 1),   # Use grid-lines for quadrants only.
-    minor_breaks = NULL       # Remove 'minor' grid-lines.
-  ) +
-  scale_y_continuous(         # Fine-tune the y axis in the same way.
-    limits = c(0, 1),
-    breaks = c(0, 0.50, 1),
-    minor_breaks = NULL
-  ) +
-  scale_colour_brewer(        # Use the Color Brewer to choose a palette.
-    type = "qual",            # Qualitative set.
-    palette = "Paired"        # Name of the palette is 'Paired'.
-  ) +
-  scale_size_continuous(      # Fine-tune the sizes of each point.
-    trans = "exp",            # Use an exp transformation to emphasise loud.
-    guide = "none"            # Remove the legend for size.
-  ) +
-  theme_light() +             # Use a simpler theme.
-  labs(                       # Make the titles nice.
-    x = "Valence",
-    y = "Energy",
-    colour = "Mode"
-  )
 ```
 
 # Conclusion
