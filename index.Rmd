@@ -50,7 +50,7 @@ corpus <- readRDS(file = "data/corpus-data.RDS")
 ## Column
 
 ### Corpus Description {style="min-height:400px"}
-The corpus will consist of K-pop songs spanning two distinct eras in the genre's evolution: the 2nd generation (2005-2011) and the 4th generation (2018-2022). K-pop is getting increasingly more popular outside South-Korea, captivating audiences with its infectious melodies. Through this corpus, I aim to explore the diverse sounds, themes, and trends within the genre, shedding light on its evolution. The 2nd generation witnessed the rise of iconic groups like Girls' Generation and Big Bang. In contrast, the 4th generation marked a new era of global influence, with groups such as BTS and BLACKPINK reaching unprecedented levels of success. I expect significant differences between the 2nd and 4th generation tracks in terms of sound, production techniques. The 4th generation is likely to showcase a broader range of genres, experimental production styles. I chose the corpus based on how many Spotify streams the songs have. In Spotifyś K-pop genre are more than 500 
+The corpus will consist of K-pop songs spanning two distinct eras in the genre's evolution: the second generation (2005-2011) and the fourth generation (2018-2022). Note that the term "generation" is used as a whole movement within the industry: a change in fan culture, trends, marketing tactics and ofcourse the music. K-pop is getting increasingly more popular outside South-Korea, captivating audiences with its infectious melodies. Through this corpus, I aim to explore the diverse sounds, themes, and trends within the genre, shedding light on its evolution. The second generation witnessed the rise of iconic groups like Girls' Generation and Big Bang. Some of the most popular ones include “Gee” (Girls Generation), “Ring Ding Dong” (SHINee), “Sorry Sorry” (Super Junior), “I Am The Best” (2NE1), and “FANTASTIC BABY” (BIGBANG). Girls sported outfits that were poppy and colorful, whereas, guys were seen in suits, tees, jeans. In contrast, the 4th generation marked a new era of global influence. The most popular groups today include Stray Kids, ATEEZ, (G)I-DLE, TXT, ITZY, ENHYPEN, aespa, IVE, LE SSERAFIM, and NewJeans. What took years to achieve success in the yesteryears, many fourth generation groups were capable of achieving in a matter of a few months. Noticeably, there has been an increased focus on creating easy hooks for building viral social media challenges. Popular songs include “LATATA” ((G)I-DLE), “WONDERLAND” (ATEEZ), “WANNABE” (ITZY), “God’s Menu” (Stray Kids), “Savage” (aespa). I expect significant differences between the 2nd and 4th generation tracks in terms of sound, production techniques. The 4th generation is likely to showcase a broader range of genres, experimental production styles. I chose the corpus based on how many Spotify streams the songs have.
 
 
 ***
@@ -72,7 +72,7 @@ The corpus will consist of K-pop songs spanning two distinct eras in the genre's
 
 #### Analysis over the entire range of songs
 
-The multivariate analysis plot shows a comparison of the liveness, acousticness and the speechness of each individual song in the corpus. There appears to be very a large bunch of songs with low acousticness and liveness. The speechness on the other hand seems all over the place, likely due to the vast differences in songs
+The multivariate analysis plot shows a comparison of the liveness, acousticness and the speechiness of each individual song in the corpus. There appears to be very a large bunch of songs with low acousticness and liveness. The speechiness on the other hand seems all over the place, likely due to the vast differences in songs
 
 
 ### Multivariate Analysis {data-width="650"}
@@ -100,16 +100,16 @@ ggplotly(multi_plot_1, tooltip = c("x", "y", "label", "size"))
 
 ## Row {style="min-height:580px"}
 
-### Key's and Tempo's
+### Keys and Tempo's
 
 We see in the two right plots a distribution of the key mode and tempo over all songs. The tempo distribution shows that the songs in the corpus is highly densed between 97 and 135 BPM with a big peak at around 130 BPM and a smaller peak at around 113 BPM. The mean tempo of the corpus is 123 BPM which seems to be a little higher than most pop songs. According to the key mode plot, B minor is the most common with 15 occurrences in the corpus followed closely by F# minor with 14 occurrences. What is interesting, is that all keys that Spotify assigns are represented at least once.
 
-### Density Distribution of the Tempo
+### Density Distribution of Tempo
 
 ```{r, echo=FALSE}
 
 keysPlot <- ggplot(corpus, aes(key_mode)) +
-  stat_count(fill = "brown3", color="brown", alpha=.9, width=0.5, position = "dodge") +
+  stat_count(fill = "pink2", color="pink4", alpha=.9, width=0.5, position = "dodge") +
   labs(x = "Key",
        y = "Frequency") +
   theme_minimal() +
@@ -129,20 +129,95 @@ tempoPlot <- corpus %>% filter(tempo > 0) %>% ggplot(aes(tempo)) +
     "text",
     x = mean_tempo + 6, y = 0.017,
     label = "Mean\nTempo",
-    vjust = 1, size = 3, color = "grey40"
+    vjust = 1, size = 3, color = "gray4"
   )
 
 ggplotly(tempoPlot)
 
 ```
 
-### Frequency of Different Key's
+### Frequency of Key's
 
 ```{r, echo=FALSE}
 ggplotly(keysPlot)
 
 ```
 
+
+
+# Track-Level Summaries {data-navmenu="Analysis" data-orientation=rows}
+
+## Row {style="min-height:300px"}
+
+### Description
+
+We can see in the plot the tempo and it's standard deviation, volume and song duration. I have made a seperation between music released by girl groups and boy groups since the styles differ and to hopefully have more interesting findings. We can see a similar distribution in tempo as was seen before. All durations are also similar and resemble typical songlenghts  
+
+
+The left plot tells a different story, it shows that there is quite a bit of variation between rock and ambient when it comes to the different octaves and their timber, which is most noticeable at c01, c02, c05 and c06. This might give a clue as to why the genres appear so similar in the right plot, yet sound and feel so different.
+
+## Row {style="min-height:600px"}
+
+### Tempo with Duration & Volume
+```{r, echo=FALSE}
+bebop <-
+  get_playlist_audio_features(
+    "",
+    "53gZC84IKZk5QoOqSwgUg9"
+  ) |>
+  slice(1:30) |>
+  add_audio_analysis()
+bigband <-
+  get_playlist_audio_features(
+    "",
+    "0XlcubxUyMwSOP3GOgzbQR"
+  ) |>
+  slice(1:30) |>
+  add_audio_analysis()
+jazz <-
+  bebop |>
+  mutate(genre = "2nd gen girl group") |>
+  bind_rows(bigband |> mutate(genre = "4th gen girl group"))
+
+jazz |>
+  mutate(
+    sections =
+      map(
+        sections,                                    # sections or segments
+        summarise_at,
+        vars(tempo, loudness, duration),             # features of interest
+        list(section_mean = mean, section_sd = sd)   # aggregation functions
+      )
+  ) |>
+  unnest(sections) |>
+  ggplot(
+    aes(
+      x = tempo,
+      y = tempo_section_sd,
+      colour = genre,
+      alpha = loudness
+    )
+  ) +
+  geom_point(aes(size = duration / 60)) +
+  geom_rug() +
+  theme_minimal() +
+  ylim(0, 5) +
+  labs(
+    x = "Mean Tempo (bpm)",
+    y = "SD Tempo",
+    colour = "Genre",
+    size = "Duration (min)",
+    alpha = "Volume (dBFS)"
+  )
+
+```
+
+
+## Row {style="min-height:800px"}
+
+### Other Features
+dance <- readRDS(file = "data/danceability_comparison_gg-plot.RDS")
+dance
 
 # Key and Chord Estimation {data-navmenu="Analysis" data-orientation=rows}
 
@@ -269,67 +344,8 @@ twenty_five |>
 
 ```
 
-# Track-Level Summaries {data-navmenu="Analysis" data-orientation=rows}
-```{r}
-bebop <-
-  get_playlist_audio_features(
-    "",
-    "53gZC84IKZk5QoOqSwgUg9"
-  ) |>
-  slice(1:30) |>
-  add_audio_analysis()
-bigband <-
-  get_playlist_audio_features(
-    "",
-    "0XlcubxUyMwSOP3GOgzbQR"
-  ) |>
-  slice(1:30) |>
-  add_audio_analysis()
-jazz <-
-  bebop |>
-  mutate(genre = "2nd gen girl group") |>
-  bind_rows(bigband |> mutate(genre = "4th gen girl group"))
-
-jazz |>
-  mutate(
-    sections =
-      map(
-        sections,                                    # sections or segments
-        summarise_at,
-        vars(tempo, loudness, duration),             # features of interest
-        list(section_mean = mean, section_sd = sd)   # aggregation functions
-      )
-  ) |>
-  unnest(sections) |>
-  ggplot(
-    aes(
-      x = tempo,
-      y = tempo_section_sd,
-      colour = genre,
-      alpha = loudness
-    )
-  ) +
-  geom_point(aes(size = duration / 60)) +
-  geom_rug() +
-  theme_minimal() +
-  ylim(0, 5) +
-  labs(
-    x = "Mean Tempo (bpm)",
-    y = "SD Tempo",
-    colour = "Genre",
-    size = "Duration (min)",
-    alpha = "Volume (dBFS)"
-  )
-
-```
-
-### Chart A
-
-# Data Collection and Preprocessing {data-navmenu="Analysis" data-orientation=rows}
-```{r}
-
-```
 
 # Conclusion
 
+Seperating by girl and boy groups, but also the genres within the k-pop genre would help with having more interesing findings. 
 
