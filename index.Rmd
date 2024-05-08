@@ -151,10 +151,7 @@ ggplotly(keysPlot)
 
 ### Description
 
-We can see in the plot the tempo and it's standard deviation, volume and song duration. I have made a seperation between music released by girl groups and boy groups since the styles differ and to hopefully have more interesting findings. We can see a similar distribution in tempo as was seen before. All durations are also similar and resemble typical songlenghts  
-
-
-The left plot tells a different story, it shows that there is quite a bit of variation between rock and ambient when it comes to the different octaves and their timber, which is most noticeable at c01, c02, c05 and c06. This might give a clue as to why the genres appear so similar in the right plot, yet sound and feel so different.
+We can see in the plot the tempo and it's standard deviation, volume and song duration. I have made a separation between music released by girl groups and boy groups since the styles differ and to hopefully have more interesting findings. We can see a similar distribution in tempo as was seen before. All duration are also similar and resemble typical song lengths. The only notable difference is that boy groups seem to have a broader range of duration distribution.
 
 ## Row {style="min-height:600px"}
 
@@ -212,12 +209,68 @@ jazz |>
 
 ```
 
+### Tempo with Duration & Volume
+```{r, echo=FALSE}
+secondb <-
+  get_playlist_audio_features(
+    "",
+    "0UqgifAkmHt86pzVTfBcmS"
+  ) |>
+  slice(1:30) |>
+  add_audio_analysis()
+fourthb <-
+  get_playlist_audio_features(
+    "",
+    "47AEDX1Vkw4Nh0ipx8eWTp"
+  ) |>
+  slice(1:30) |>
+  add_audio_analysis()
+
+boy <-
+  secondb |>
+  mutate(genre = "2nd gen boy group") |>
+  bind_rows(fourthb |> mutate(genre = "4th gen boy group"))
+
+boy |>
+  mutate(
+    sections =
+      map(
+        sections,                                    # sections or segments
+        summarise_at,
+        vars(tempo, loudness, duration),             # features of interest
+        list(section_mean = mean, section_sd = sd)   # aggregation functions
+      )
+  ) |>
+  unnest(sections) |>
+  ggplot(
+    aes(
+      x = tempo,
+      y = tempo_section_sd,
+      colour = genre,
+      alpha = loudness
+    )
+  ) +
+  geom_point(aes(size = duration / 60)) +
+  geom_rug() +
+  theme_minimal() +
+  ylim(0, 5) +
+  labs(
+    x = "Mean Tempo (bpm)",
+    y = "SD Tempo",
+    colour = "Genre",
+    size = "Duration (min)",
+    alpha = "Volume (dBFS)"
+  )
+```
 
 ## Row {style="min-height:800px"}
 
 ### Other Features
-dance <- readRDS(file = "data/danceability_comparison_gg-plot.RDS")
-dance
+```{r, echo=FALSE}
+tempogram <- readRDS(file = "data/tempogram-plot.RDS")
+tempogram
+
+```
 
 # Key and Chord Estimation {data-navmenu="Analysis" data-orientation=rows}
 
@@ -225,7 +278,7 @@ dance
 
 ### Description
 
-What we see:
+The song is mostly in the key of A and a minor mode. There are short breaks in between, this is when there is no singing.
 
 ### Key and Chord Estimation
 ```{r}
@@ -346,6 +399,6 @@ twenty_five |>
 
 
 # Conclusion
-
-Seperating by girl and boy groups, but also the genres within the k-pop genre would help with having more interesing findings. 
+This research utilized various techniques such as comparative plot analysis and clustering. Through the course of this analysis it has been become clear that within the genre of k-pop and a specific time frame, the music varies. 
+Separating by girl and boy groups, but also the genres within the k-pop genre would help with having more interesting findings. 
 
